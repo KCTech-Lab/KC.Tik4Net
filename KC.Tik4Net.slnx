@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Docs/">
+    <File Path="HighLevelApi.md" />
+    <File Path="LICENSE" />
+    <File Path="LowLevelApi.md" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="KC.Tik4Net/KC.Tik4Net.csproj" />
+  <Project Path="TestHarness/TestHarness.csproj" />
+</Solution>
