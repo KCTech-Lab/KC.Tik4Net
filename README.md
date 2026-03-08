@@ -35,9 +35,9 @@ If you want a modern, async-first RouterOS client for current .NET, KC.Tik4Net i
 
 For usage details and examples, see the included docs and harness:
 
-- **Low-level API guide:** [`LowLevelApi.md`](KC.Tik4Net/LowLevelApi.md)  
+- **Low-level API guide:** [`LowLevelApi.md`](LowLevelApi.md)  
   Explains the core async client, connections, and raw RouterOS commands.
-- **High-level API guide:** [`HighLevelApi.md`](KC.Tik4Net/HighLevelApi.md)  
+- **High-level API guide:** [`HighLevelApi.md`](HighLevelApi.md)  
   Describes the emerging high-level services (e.g. firewall address lists) and models.
 - **Test harness:** [`TestHarness`](TestHarness)  
   A small console application that shows realistic usage of both low-level and
