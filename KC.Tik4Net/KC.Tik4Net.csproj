@@ -10,7 +10,11 @@
 		<!-- Basic identity -->
 		<AssemblyTitle>KC.Tik4Net</AssemblyTitle>
 		<Product>KC.Tik4Net</Product>
-		<Description>Async .NET 10+ client for MikroTik RouterOS, a modern successor to tik4net.</Description>
+		<Description>
+			Async-only .NET 10+ client for MikroTik RouterOS.
+			A forward-looking successor to tik4net, simplified for modern tooling
+			and intentionally free of legacy compatibility.
+		</Description>
 		<Company>KCtech</Company>
 		<Authors>KC</Authors>
 
@@ -25,7 +29,7 @@
 		<PackageTags>mikrotik;routeros;networking;async;dotnet;kc.tik4net</PackageTags>
 
 		<!-- Pre-1.0 semantic version -->
-		<Version>0.9.0</Version>
+		<Version>0.1.0</Version>
 	</PropertyGroup>
 
 
