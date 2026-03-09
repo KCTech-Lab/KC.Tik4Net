@@ -1,56 +1,36 @@
 ﻿namespace KC.Tik4Net;
 
 /// <summary>
-///     Response sentence (<see cref="ITikSentence" />) from mikrotik router with !re data.
-///     It is data sentence (typically when list of entities is requested).
+///     Represents a <c>!re</c> sentence containing data returned by RouterOS.
 /// </summary>
-/// <seealso cref="ITikSentence" />
-/// <seealso cref="ITikDoneSentence" />
-/// <seealso cref="ITikTrapSentence" />
 public interface ITikReSentence : ITikSentence
 {
     /// <summary>
-    ///     Gets the .id property. Throws exception if property .id has not been returned from mikrotik router as part of
-    ///     response sentence.
+    ///     Gets the <c>.id</c> value from the sentence.
     /// </summary>
-    /// <returns>Value of the .id property.  =.id=value</returns>
-    /// <exception cref="TikSentenceException">When word/property has not been found in response sentence.</exception>
-    /// <seealso cref="TikSpecialProperties.Id" />
+    /// <returns>The RouterOS internal id.</returns>
     string GetId();
 
     /// <summary>
-    ///     Gets the sentence word (one property). Throws exception if property with given name has not been returned from
-    ///     mikrotik router as part of response sentence.
+    ///     Gets a required field value from the sentence.
     /// </summary>
-    /// <param name="fieldName">Name of the word (property). =name=value</param>
-    /// <returns>Value of the word (property) with given <paramref name="fieldName" />.  =name=value</returns>
-    /// <exception cref="TikSentenceException">When word/property has not been found in response sentence.</exception>
+    /// <param name="fieldName">Field name to read.</param>
+    /// <returns>The field value.</returns>
     string GetResponseField(string fieldName);
 
     /// <summary>
-    ///     Tries to get the sentence word (one property). Returns false if property with given name has not been returned from
-    ///     mikrotik router as part of response sentence.
+    ///     Tries to get a field value from the sentence.
     /// </summary>
-    /// <param name="fieldName">Name of the word (property). =name=value</param>
-    /// <param name="fieldValue">Value of the word (property) with given <paramref name="fieldName" />.  =name=value</param>
-    /// <returns>
-    ///     True if word (property) with given name has been found - has been returned from mikrotik router as part of
-    ///     response sentence
-    /// </returns>
+    /// <param name="fieldName">Field name to read.</param>
+    /// <param name="fieldValue">When this method returns, contains the field value if found.</param>
+    /// <returns><see langword="true" /> when the field exists; otherwise <see langword="false" />.</returns>
     bool TryGetResponseField(string fieldName, out string fieldValue);
 
     /// <summary>
-    ///     Gets the sentence word (one property). Resturns <paramref name="defaultValue" /> if property with given name has
-    ///     not been returned from mikrotik router as part of response sentence.
+    ///     Gets a field value or returns the supplied default when the field is missing.
     /// </summary>
-    /// <param name="fieldName">Name of the word (property). =name=value</param>
-    /// <param name="defaultValue">
-    ///     Default value, which is returned if property with given name has not been returned from
-    ///     mikrotik router as part of response sentence.
-    /// </param>
-    /// <returns>
-    ///     Value of the word (property) with given <paramref name="fieldName" /> or <paramref name="defaultValue" />.
-    ///     =name=value
-    /// </returns>
+    /// <param name="fieldName">Field name to read.</param>
+    /// <param name="defaultValue">Value returned when the field is missing.</param>
+    /// <returns>The field value, or <paramref name="defaultValue" />.</returns>
     string GetResponseFieldOrDefault(string fieldName, string defaultValue);
 }

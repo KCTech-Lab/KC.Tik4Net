@@ -1,41 +1,39 @@
 ﻿namespace KC.Tik4Net;
 
 /// <summary>
-///     Connection type used to access mikrotik router. Default is <see cref="TikConnectionType.Api" />.
+///     Identifies the supported RouterOS connection transports.
 /// </summary>
 public enum TikConnectionType
 {
     /// <summary>
-    ///     Mikrotik API connection - default value.
+    ///     Plain RouterOS API transport.
     /// </summary>
     Api,
 
     /// <summary>
-    ///     Mikrotik API-SSL connection (supports only mode with certificate on mikrotik). See
-    ///     https://github.com/danikf/tik4net/wiki/SSL-connection for details.
+    ///     TLS-protected RouterOS API transport.
     /// </summary>
     ApiSsl,
 
     /// <summary>
-    ///     Mikrotik API connection for then RouterOS version 6.43 and newer.
+    ///     Legacy alias retained for compatibility.
     /// </summary>
     [Obsolete("Use 'Api' version - works for both old and new version of the login", true)]
     Api_v2,
 
     /// <summary>
-    ///     Mikrotik API-SSL connection for then RouterOS version 6.43 and newer. (supports only mode with certificate on
-    ///     mikrotik). See https://github.com/danikf/tik4net/wiki/SSL-connection for details.
+    ///     Legacy alias retained for compatibility.
     /// </summary>
     [Obsolete("Use 'Api' version - works for both old and new version of the login", true)]
     ApiSsl_v2,
 
     /// <summary>
-    ///     SSH connection - NOT IMPLEMENTED YET.
+    ///     Reserved for a future SSH transport.
     /// </summary>
     [Obsolete("For future use.", true)] Ssh,
 
     /// <summary>
-    ///     Telnet connection - NOT IMPLEMENTED YET.
+    ///     Reserved for a future Telnet transport.
     /// </summary>
     [Obsolete("For future use.", true)] Telnet
 }

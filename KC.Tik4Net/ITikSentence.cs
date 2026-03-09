@@ -1,17 +1,17 @@
 ﻿namespace KC.Tik4Net;
 
 /// <summary>
-///     Base of all sentences returned from mikrotik router as response to request.
+///     Represents a single RouterOS response sentence.
 /// </summary>
 public interface ITikSentence
 {
     /// <summary>
-    ///     All sentence words (properties). {fieldName, value}
+    ///     Gets the words returned in the sentence.
     /// </summary>
     IReadOnlyDictionary<string, string> Words { get; }
 
     /// <summary>
-    ///     Tag of sentence.
+    ///     Gets the RouterOS tag associated with the sentence.
     /// </summary>
     string Tag { get; }
 }

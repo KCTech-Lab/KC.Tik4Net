@@ -1,5 +1,8 @@
 namespace KC.Tik4Net.HighLevel.System;
 
+/// <summary>
+///     Provides high-level access to RouterOS system operations.
+/// </summary>
 public sealed class SystemService
 {
     private readonly ITikConnection _connection;
@@ -9,6 +12,11 @@ public sealed class SystemService
         _connection = connection;
     }
 
+    /// <summary>
+    ///     Reads the configured RouterOS identity name.
+    /// </summary>
+    /// <param name="cancellationToken">Token used to cancel the request.</param>
+    /// <returns>The current RouterOS identity name.</returns>
     public async Task<string> GetIdentityAsync(CancellationToken cancellationToken = default)
     {
         var cmd = _connection.CreateCommand("/system/identity/print");

@@ -1,31 +1,27 @@
 ﻿namespace KC.Tik4Net;
 
 /// <summary>
-///     How parameter will be formated in mikrotik request
+///     Defines how a command parameter is written into a RouterOS request.
 /// </summary>
 public enum TikCommandParameterFormat
 {
     /// <summary>
-    ///     Depends on <see cref="ITikCommand.DefaultParameterFormat" /> (or on method which is executed on command).
+    ///     Uses the command or call-site default behavior.
     /// </summary>
     Default,
 
     /// <summary>
-    ///     Format: ?name=value  (query).
+    ///     Writes the parameter as a filter row in the form <c>?name=value</c>.
     /// </summary>
     Filter,
 
     /// <summary>
-    ///     Format: =name=value (set, execute)
+    ///     Writes the parameter as a name/value row in the form <c>=name=value</c>.
     /// </summary>
     NameValue,
 
     /// <summary>
-    ///     Format .tag=value. <seealso cref="TikSpecialProperties.Tag" />
+    ///     Writes the parameter as a tag row in the form <c>.tag=value</c>.
     /// </summary>
     Tag
-    ///// <summary>
-    ///// Format: =name (unset)
-    ///// </summary>
-    //NameOnly,
 }

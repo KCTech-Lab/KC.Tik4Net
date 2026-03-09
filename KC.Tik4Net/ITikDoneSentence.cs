@@ -1,25 +1,20 @@
 ﻿namespace KC.Tik4Net;
 
 /// <summary>
-///     Response sentence (<see cref="ITikSentence" />) from mikrotik router with !done status.
-///     It is last sentence from sucessfull operation.
+///     Represents a <c>!done</c> sentence that marks successful completion of a command.
 /// </summary>
-/// <seealso cref="ITikSentence" />
-/// <seealso cref="ITikReSentence" />
-/// <seealso cref="ITikTrapSentence" />
 public interface ITikDoneSentence : ITikSentence
 {
     /// <summary>
-    ///     Gets the =ret sentence word (result). Throws exception if property with name =ret has not been returned from
-    ///     mikrotik router as part of done sentence.
+    ///     Gets the <c>ret</c> value from the done sentence.
     /// </summary>
-    /// <seealso cref="TikSpecialProperties.Ret" />
+    /// <returns>The returned value.</returns>
     string GetResponseWord();
 
     /// <summary>
-    ///     Gets the =ret sentence word (result). Returns <paramref name="defaultValue" /> if property with name =ret has not
-    ///     been returned from mikrotik router as part of done sentence.
+    ///     Gets the <c>ret</c> value or returns the supplied default when it is absent.
     /// </summary>
-    /// <seealso cref="TikSpecialProperties.Ret" />
+    /// <param name="defaultValue">Value returned when <c>ret</c> is missing.</param>
+    /// <returns>The returned value, or <paramref name="defaultValue" />.</returns>
     string GetResponseWordOrDefault(string defaultValue);
 }

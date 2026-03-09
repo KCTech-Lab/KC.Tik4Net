@@ -1,81 +1,166 @@
-# tik4net (current)
+# Low-level API
+
+## Overview
+
+The low-level layer exposes the RouterOS API protocol through an async-first .NET surface.
+It is intended for callers who want direct control over command paths, parameters, and
+response handling without depending on higher-level abstractions.
+
+This layer is the foundation of the library and is intended to remain relatively stable.
 
 ## Requirements
 
-- .NET: `net10.0` (as currently targeted by the solution)
-- RouterOS: MikroTik RouterOS with API enabled
-  - API (plain): TCP `8728`
-  - API-SSL (TLS): TCP `8729`
-- Credentials with sufficient permissions for the commands you execute
+- **Target framework:** .NET 10+
+- **RouterOS:** API enabled on the target device
+  - API: TCP `8728`
+  - API-SSL: TCP `8729`
+- **Permissions:** credentials with access to the commands you execute
 
-Notes:
-- The library is **async-first**. Synchronous execution is not supported.
-- Cancellation is treated as **transactional**: if an in-flight operation is canceled, the connection is closed to avoid leaving the protocol stream half-consumed.
+## Core types
 
----
+- `ConnectionFactory` — creates and opens connections
+- `ITikConnection` — represents a RouterOS API session
+- `ITikCommand` — builds and executes a single command
+- `ITikCommandParameter` — represents one encoded command parameter
+- `ITikSentence` — base abstraction for returned sentences
+- `ITikReSentence` — data sentence (`!re`)
+- `ITikTrapSentence` — error sentence (`!trap`)
+- `ITikDoneSentence` — completion sentence (`!done`)
 
 ## Usage
 
-### 1) Connect
+Use the low-level API when you want RouterOS command paths and parameters to remain explicit in
+application code.
 
-Use `ConnectionFactory` for convenience.
+Typical flow:
 
-- Plain API:
-  - `ConnectionFactory.ConnectAsync(TikConnectionType.Api, host, user, password, ct)`
-- API over TLS:
-  - `ConnectionFactory.ConnectAsync(TikConnectionType.ApiSsl, host, user, password, ct)`
+1. Open a connection with `ConnectionFactory.ConnectAsync(...)` or create one explicitly.
+2. Build a command or send raw rows.
+3. Execute the command.
+4. Read returned `!re`, `!trap`, and `!done` sentences as needed.
 
-Always `await using` the connection so it is closed even on exceptions/cancellation.
+`TestHarness/Tests/LowLevelSanityTests.cs` shows a complete end-to-end scenario against a real
+RouterOS device, including identity reads and address-list updates.
 
-### 2) Execute a command (list)
+### Buffered execution
 
-If you want all returned rows buffered:
+Use buffered execution when you want the full result materialized before processing.
+This fits straightforward reads, validation steps, and small result sets.
 
-- Create a command:
-  - `var cmd = connection.CreateCommand("/system/identity/print");`
-- Execute:
-  - `var rows = await cmd.ExecuteListAsync(ct);`
+### Streaming execution
 
-Returned items are `ITikReSentence` (RouterOS `!re` rows).
+Use streaming execution when result size is unknown, potentially large, or naturally processed as
+it arrives.
+This is the preferred pattern for scans, listings, and longer-running reads.
 
-### 3) Execute a command (stream)
+### Cancellation
 
-For large outputs (preferred for scans):
+Pass a cancellation token into connection and execution calls so the caller controls the lifetime
+of network operations explicitly.
 
-- `await foreach (var row in cmd.ExecuteStreamAsync().WithCancellation(ct)) { ... }`
+## Creating a connection
 
-Important:
-- The stream method intentionally has **no** `CancellationToken` parameter to keep builds warning-free; cancellation is applied by calling `.WithCancellation(ct)` at the enumeration site.
+Use `ConnectionFactory` as the standard entry point.
 
-### 4) Low-level execution (raw rows)
+### Plain API
 
-If you need full sentence-level control (including `!trap` / `!done`):
+- `ConnectionFactory.ConnectAsync(TikConnectionType.Api, host, user, password, cancellationToken)`
 
-- Build command rows yourself (first row is the command, then parameters):
-  - `new[] { "/ip/address/print", "?disabled=false", "=.proplist=address,interface" }`
-- Enumerate sentences:
-  - `await foreach (var s in connection.ExecuteStreamAsync(rows).WithCancellation(ct)) { ... }`
+### API over TLS
 
-If you want a buffered list of all sentences:
+- `ConnectionFactory.ConnectAsync(TikConnectionType.ApiSsl, host, user, password, cancellationToken)`
 
-- `var sentences = await connection.ExecuteAsync(rows, ct);`
+Prefer `await using` so the connection is closed cleanly even when execution fails.
 
-### 5) Close
+## Executing commands
 
-- `await connection.CloseAsync(ct);` or rely on `await using`.
+### Buffered execution
 
----
+Use `ExecuteListAsync` when you want the full result materialized before processing.
+This fits smaller result sets and straightforward read operations.
 
-## Behavioral notes
+Typical flow:
 
-- **Single-flight per connection:** only one in-flight execute is allowed per `ITikConnection`. Parallelism requires multiple connections.
-- **Cancellation closes the connection:** treat router interactions as transactions; on cancel, create a new connection.
-- **Timeouts:** `SendTimeout` / `ReceiveTimeout` exist on `ITikConnection` (milliseconds). Prefer cancellation for end-to-end control.
+1. Create a command from the connection.
+2. Add parameters if needed.
+3. Await `ExecuteListAsync`.
 
----
+### Streaming execution
 
-## Quick checklist for parallel scans
+Use `ExecuteStreamAsync` when result size is unknown, large, or naturally processed as a stream.
+Apply cancellation at the enumeration site with `.WithCancellation(cancellationToken)`.
 
-- Create a **connection pool** (N connections) rather than sharing one connection across N tasks.
-- Use streaming (`ExecuteStreamAsync`) and apply cancellation with `.WithCancellation(ct)`.
-- On any `OperationCanceledException`, dispose the connection and recreate.
+### Sentence-level execution
+
+If you need direct protocol control, `ITikConnection` can execute raw command rows and expose all
+returned sentence types, including `!trap` and `!done`.
+
+This is useful when building custom abstractions or when the higher-level command helpers are not
+the right fit for the operation.
+
+## Parameters
+
+Commands support explicit RouterOS parameters through `ITikCommandParameter` and helper methods on
+`ITikCommand`.
+
+Common patterns include:
+
+- query filters such as `?list=my-list`
+- field assignments such as `=comment=example`
+- property selection through `.proplist`
+
+Parameter handling is intentionally explicit so the request shape stays visible in calling code.
+
+## Working with responses
+
+RouterOS replies are modeled as sentences:
+
+- `!re` contains returned data
+- `!trap` reports a command-level failure
+- `!done` marks successful completion
+
+For `!re` sentences, fields can be read through:
+
+- `GetResponseField`
+- `TryGetResponseField`
+- `GetResponseFieldOrDefault`
+
+For `!done` sentences, optional return values can be read through:
+
+- `GetResponseWord`
+- `GetResponseWordOrDefault`
+
+## Concurrency model
+
+A single `ITikConnection` supports one in-flight execution at a time.
+
+If you need parallel work, create multiple connections rather than sharing one connection across
+concurrent operations.
+
+## Cancellation behavior
+
+Cancellation is handled conservatively.
+If an in-flight operation is canceled, the connection may be closed to avoid leaving the protocol
+stream in a partially consumed state.
+
+Treat cancellation as transactional and create a new connection after a canceled operation when
+you need predictable continuation.
+
+## Timeouts
+
+`ITikConnection` exposes send and receive timeout properties.
+For end-to-end control, cancellation tokens remain the preferred mechanism.
+
+## Error handling
+
+Command failures are surfaced through trap sentences and exception types in the public API.
+When you build directly on the low-level layer, keep both protocol-level errors and transport-level
+failures in mind.
+
+## TestHarness reference
+
+The `TestHarness` project contains practical low-level examples against a real RouterOS device,
+including connection setup, command execution, explicit encoding verification, and end-to-end
+validation.
+
+If you want a working integration example before writing your own abstraction layer, start there.

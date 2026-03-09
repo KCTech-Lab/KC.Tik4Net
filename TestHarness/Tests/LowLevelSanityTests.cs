@@ -18,6 +18,7 @@ internal static class LowLevelSanityTests
         foreach (var sentence in identity)
             Console.Out.WriteLine(sentence);
 
+        // Keep one stable entry on the router so encoding behavior can be verified repeatedly.
         await EnsurePersistentDanishEntry(connection);
 
         await connection.CloseAsync();
@@ -29,6 +30,7 @@ internal static class LowLevelSanityTests
         const string testAddress = "10.250.0.3";
         const string comment = "æøå ÆØÅ";
 
+        // Verify the exact bytes we expect to send before touching the router.
         AssertWinBoxWireBytes(comment);
 
         var entries = (await ListAddressList(connection))
@@ -54,6 +56,7 @@ internal static class LowLevelSanityTests
         }
         else
         {
+            // Rewrite existing matches so the router ends up with the expected comment text.
             foreach (var e in entries)
                 if (e.Words.TryGetValue(TikSpecialProperties.Id, out var id))
                 {

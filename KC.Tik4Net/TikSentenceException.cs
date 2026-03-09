@@ -1,17 +1,14 @@
 ﻿namespace KC.Tik4Net;
 
 /// <summary>
-///     Exception called when response sentence from mikrotik router is not in proper format.
+///     Represents an error caused by a malformed or otherwise invalid RouterOS response sentence.
 /// </summary>
-/// <remarks>
-///     ctor.
-/// </remarks>
 /// <param name="message">Exception message.</param>
-/// <param name="sentecne">Sentence with error - not proper format.</param>
-public class TikSentenceException(string message, ITikSentence sentecne) : Exception(message)
+/// <param name="sentence">Sentence that caused the error.</param>
+public class TikSentenceException(string message, ITikSentence sentence) : Exception(message)
 {
     /// <summary>
-    ///     Sentence with error - not proper format.
+    ///     Gets the sentence that caused the error.
     /// </summary>
-    public ITikSentence Sentence { get; } = sentecne;
+    public ITikSentence Sentence { get; } = sentence;
 }

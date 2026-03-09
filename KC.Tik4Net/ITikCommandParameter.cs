@@ -1,24 +1,24 @@
 ﻿namespace KC.Tik4Net;
 
 /// <summary>
-///     Named parameter used by <see cref="ITikCommand" />.
+///     Represents a named parameter attached to a RouterOS command.
 /// </summary>
 public interface ITikCommandParameter
 {
     /// <summary>
-    ///     Parameter name.
-    ///     REMARKS: If starts with one of ?= character, than <see cref="ParameterFormat" /> is ignored.
+    ///     Gets or sets the parameter name.
+    ///     Names that already start with <c>?</c> or <c>=</c> bypass <see cref="ParameterFormat" />.
     /// </summary>
     string Name { get; set; }
 
     /// <summary>
-    ///     Parameter value (formated to string as expected by <see cref="ITikConnection" />).
+    ///     Gets or sets the parameter value encoded into the outgoing command row.
     /// </summary>
     string Value { get; set; }
 
     /// <summary>
-    ///     Parameter specific format how will be parameter formated in mikrotik request.
-    ///     REMARKS: This value is ignored if <see cref="Name" /> starts with one of ?= characters
+    ///     Gets or sets how the parameter is formatted when written to RouterOS.
+    ///     Ignored when <see cref="Name" /> already contains the RouterOS prefix.
     /// </summary>
     TikCommandParameterFormat ParameterFormat { get; set; }
 }

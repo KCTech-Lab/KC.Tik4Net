@@ -12,10 +12,10 @@ internal static class HighLevelAddressListTests
 
         await using var client = await MikrotikClient.Connect(host, user, pass);
 
-        // 1) Clear the firewall address list
+        // Start from an empty list so the sync behavior is easy to reason about.
         await client.Firewall.AddressLists.ClearAsync(listName);
 
-        // 2) Create desired list off-line and call sync
+        // Build the first desired state in memory and let the service create it on the router.
         var desired1 = new AddressListEntry[5];
         desired1[0] = new AddressListEntry("", listName, "10.250.10.10", $"hl {runId} a", false, null);
         desired1[1] = new AddressListEntry("", listName, "10.250.10.11", $"hl {runId} b", true, null);
@@ -25,27 +25,24 @@ internal static class HighLevelAddressListTests
 
         _ = await client.Firewall.AddressLists.SyncListAsync(listName, desired1);
 
-        // 3) Fetch the list
+        // Read back the list so the second sync can evolve real router data.
         var fetched = await client.Firewall.AddressLists.GetListAsync(listName);
         if (fetched.Count != 5)
             throw new InvalidOperationException($"Expected 5 entries after initial sync, got {fetched.Count}.");
 
-        // 4) Edit the fetched list (explicit and preserve timeout where not specified)
-        var keepA = FindByAddress(fetched, "10.250.10.10"); // will be disabled
-        var keepC = FindByAddress(fetched, "10.250.10.12"); // will have edited comment; preserve timeout
-        var keepD = FindByAddress(fetched, "10.250.10.13"); // will stay as-is
-        var keepE = FindByAddress(fetched, "10.250.10.14"); // will stay as-is
+        // Keep some entries, mutate a couple, and drop one by leaving it out of the next desired state.
+        var keepA = FindByAddress(fetched, "10.250.10.10");
+        var keepC = FindByAddress(fetched, "10.250.10.12");
+        var keepD = FindByAddress(fetched, "10.250.10.13");
+        var keepE = FindByAddress(fetched, "10.250.10.14");
 
-        // Disable an item
+        // Flip one flag to prove update detection works.
         keepA = keepA with { Disabled = true };
 
-        // Edit an item (preserve timeout by not changing it)
+        // Change one comment while leaving the timeout untouched.
         keepC = keepC with { Comment = $"hl {runId} c-edited" };
 
-        // Remove the item to be removed from the list
-        // (we remove B by simply not including it in desired2)
-
-        // Create and add the new item (no timeout => router default)
+        // Add one new entry so the sync has to create, update, and remove in one pass.
         var newItem = new AddressListEntry(
             "",
             listName,
@@ -54,7 +51,6 @@ internal static class HighLevelAddressListTests
             false,
             null);
 
-        // Build the new desired config as an array
         var desired2 = new AddressListEntry[5];
         desired2[0] = keepA;
         desired2[1] = keepC;
@@ -62,14 +58,13 @@ internal static class HighLevelAddressListTests
         desired2[3] = keepE;
         desired2[4] = newItem;
 
-        // 5) Run sync and look at the result (effective router config)
         var sync = await client.Firewall.AddressLists.SyncListAsync(listName, desired2);
         Console.Out.WriteLine($"HL sync: added={sync.Added}, removed={sync.Removed}, updated={sync.Updated}");
 
         var effective = sync.Effective;
         ValidateEffective(effective, desired2);
 
-        // Leave the list on the router after.
+        // Leave the final list on the router so the result can be inspected manually if needed.
         Console.Out.WriteLine("HighLevel address-list sync scenario completed.");
     }
 
@@ -111,9 +106,7 @@ internal static class HighLevelAddressListTests
                     throw new InvalidOperationException(
                         $"Disabled mismatch for {exp.Address}. Expected {exp.Disabled}, got {act.Disabled}.");
 
-                // NOTE: timeouts are countdown values on RouterOS; exact read-back is not stable.
-                // So even if caller specifies a timeout, we don't assert exact equality here.
-
+                // RouterOS reports timeout values as countdowns, so exact string equality is not stable.
                 break;
             }
 

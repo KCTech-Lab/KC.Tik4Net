@@ -1,27 +1,22 @@
 ﻿namespace KC.Tik4Net;
 
 /// <summary>
-///     Response sentence (<see cref="ITikSentence" />) from mikrotik router with !trap status.
-///     This sentence is returned when any error occurs.
+///     Represents a <c>!trap</c> sentence returned when RouterOS reports an error.
 /// </summary>
-/// <seealso cref="ITikSentence" />
-/// <seealso cref="ITikReSentence" />
-/// <seealso cref="ITikDoneSentence" />
-/// <see cref="TikCommandTrapException" />
 public interface ITikTrapSentence : ITikSentence
 {
     /// <summary>
-    ///     Code of the error category.
+    ///     Gets the RouterOS error category code.
     /// </summary>
     string CategoryCode { get; }
 
     /// <summary>
-    ///     Readable description of the <see cref="CategoryCode" />. (taken from documentation)
+    ///     Gets a human-readable description of <see cref="CategoryCode" />.
     /// </summary>
     string CategoryDescription { get; }
 
     /// <summary>
-    ///     Message of the error from mikrotik router.
+    ///     Gets the error message returned by RouterOS.
     /// </summary>
     string Message { get; }
 }

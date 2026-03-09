@@ -2,16 +2,29 @@
 
 namespace KC.Tik4Net;
 
+/// <summary>
+///     Converts between RouterOS time strings and common .NET time representations.
+/// </summary>
 public static partial class TikTimeHelper
 {
     [GeneratedRegex("((\\d+)w)?((\\d+)d)?((\\d+)h)?((\\d+)m)?((\\d+)s)?((\\d+)ms)?", RegexOptions.Compiled)]
     private static partial Regex UptimeRegex();
 
+    /// <summary>
+    ///     Converts a nullable second count to RouterOS time format.
+    /// </summary>
+    /// <param name="seconds">Number of seconds to convert.</param>
+    /// <returns>A RouterOS time string, or <c>none</c> when the value is null or zero.</returns>
     public static string ToTikTime(int? seconds)
     {
         return ToTikTime((long?)seconds);
     }
 
+    /// <summary>
+    ///     Converts a nullable second count to RouterOS time format.
+    /// </summary>
+    /// <param name="seconds">Number of seconds to convert.</param>
+    /// <returns>A RouterOS time string, or <c>none</c> when the value is null or zero.</returns>
     public static string ToTikTime(long? seconds)
     {
         if (!seconds.HasValue || seconds == 0)
@@ -28,6 +41,11 @@ public static partial class TikTimeHelper
             (t.Seconds != 0 ? t.Seconds + "s" : string.Empty);
     }
 
+    /// <summary>
+    ///     Parses a RouterOS time string and returns the total number of whole seconds.
+    /// </summary>
+    /// <param name="time">RouterOS time string.</param>
+    /// <returns>Total number of whole seconds.</returns>
     public static int FromTikTimeToSeconds(string time)
     {
         if (string.IsNullOrWhiteSpace(time) || string.Equals(time, "none", StringComparison.OrdinalIgnoreCase))
@@ -58,6 +76,11 @@ public static partial class TikTimeHelper
         return int.Parse(split[0]) * multiplier;
     }
 
+    /// <summary>
+    ///     Parses a RouterOS time string into a <see cref="TimeSpan" />.
+    /// </summary>
+    /// <param name="time">RouterOS time string.</param>
+    /// <returns>The parsed <see cref="TimeSpan" />, or <see cref="TimeSpan.MinValue" /> when parsing fails.</returns>
     public static TimeSpan FromTikTimeToTimeSpan(string time)
     {
         var uptime = TimeSpan.MinValue;

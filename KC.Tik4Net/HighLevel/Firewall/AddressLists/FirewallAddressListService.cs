@@ -1,5 +1,8 @@
 namespace KC.Tik4Net.HighLevel.Firewall.AddressLists;
 
+/// <summary>
+///     Provides high-level operations for RouterOS firewall address lists.
+/// </summary>
 public sealed class FirewallAddressListService
 {
     private readonly ITikConnection _connection;
@@ -9,6 +12,11 @@ public sealed class FirewallAddressListService
         _connection = connection;
     }
 
+    /// <summary>
+    ///     Deletes all entries from the specified address list.
+    /// </summary>
+    /// <param name="listName">Address-list name to clear.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task ClearAsync(string listName, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(listName);
@@ -18,6 +26,12 @@ public sealed class FirewallAddressListService
             await DeleteAsync(e.Id, cancellationToken);
     }
 
+    /// <summary>
+    ///     Reads all entries from the specified address list.
+    /// </summary>
+    /// <param name="listName">Address-list name to read.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The current entries in the address list.</returns>
     public async Task<IReadOnlyList<AddressListEntry>> GetListAsync(
         string listName,
         CancellationToken cancellationToken = default)
@@ -38,6 +52,12 @@ public sealed class FirewallAddressListService
         return result;
     }
 
+    /// <summary>
+    ///     Reads a single address-list entry by RouterOS id.
+    /// </summary>
+    /// <param name="id">RouterOS internal id.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The matching entry, or <see langword="null" /> when it does not exist.</returns>
     public async Task<AddressListEntry?> ReadAsync(string id, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
@@ -55,6 +75,16 @@ public sealed class FirewallAddressListService
         return null;
     }
 
+    /// <summary>
+    ///     Adds an entry to an address list and returns its RouterOS id.
+    /// </summary>
+    /// <param name="listName">Target address-list name.</param>
+    /// <param name="address">IP address or network to add.</param>
+    /// <param name="comment">Optional comment.</param>
+    /// <param name="disabled">Optional disabled state.</param>
+    /// <param name="timeout">Optional RouterOS timeout string.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>The RouterOS id of the created entry.</returns>
     public async Task<string> AddAsync(
         string listName,
         string address,
@@ -89,6 +119,11 @@ public sealed class FirewallAddressListService
         return id ?? throw new InvalidOperationException("Address-list entry added but id could not be resolved.");
     }
 
+    /// <summary>
+    ///     Deletes an address-list entry by RouterOS id.
+    /// </summary>
+    /// <param name="id">RouterOS internal id.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
@@ -99,6 +134,14 @@ public sealed class FirewallAddressListService
         await cmd.ExecuteListAsync(cancellationToken);
     }
 
+    /// <summary>
+    ///     Updates mutable fields on an existing address-list entry.
+    /// </summary>
+    /// <param name="id">RouterOS internal id.</param>
+    /// <param name="comment">Replacement comment, or <see langword="null" /> to leave unchanged.</param>
+    /// <param name="disabled">Replacement disabled state, or <see langword="null" /> to leave unchanged.</param>
+    /// <param name="timeout">Replacement RouterOS timeout string, or <see langword="null" /> to leave unchanged.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
     public async Task UpdateAsync(
         string id,
         string? comment = null,
@@ -121,6 +164,13 @@ public sealed class FirewallAddressListService
         await cmd.ExecuteListAsync(cancellationToken);
     }
 
+    /// <summary>
+    ///     Synchronizes a RouterOS address list with the supplied desired entries.
+    /// </summary>
+    /// <param name="listName">Address-list name to synchronize.</param>
+    /// <param name="desired">Desired final set of entries for the list.</param>
+    /// <param name="cancellationToken">Token used to cancel the operation.</param>
+    /// <returns>A summary of additions, removals, updates, and the effective final state.</returns>
     public async Task<AddressListSyncResult> SyncListAsync(
         string listName,
         AddressListEntry[] desired,
