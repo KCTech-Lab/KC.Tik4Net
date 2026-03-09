@@ -38,19 +38,16 @@ var identity = rows.Single().GetResponseField("name");
 
 ## Documentation and examples
 
-- **Low-level API guide:** [`LowLevelApi.md`](LowLevelApi.md)
-- **High-level API guide:** [`HighLevelApi.md`](HighLevelApi.md)
-- **Test harness:** [`TestHarness`](TestHarness)
-
 - **Low-level API guide:** [`LowLevelApi.md`](LowLevelApi.md)  
   Explains the core async client, connections, and raw RouterOS commands.
 - **High-level API guide:** [`HighLevelApi.md`](HighLevelApi.md)  
-  Describes the emerging high-level services (e.g. firewall address lists) and models.
+  Describes the emerging high-level services and current typed models.
 - **Test harness:** [`TestHarness`](TestHarness)  
-  A small console application that shows realistic usage of both low-level and
-  selected high-level APIs against a RouterOS device and doubles as a regression
-  test for the library.
+  A small console application that shows realistic usage of both low-level and selected high-level APIs against a RouterOS device.
+
 The harness is the best place to see real code that connects, runs commands, and exercises encoding and high-level helpers end to end.
+
+## Getting started
 
 There is currently **no NuGet package**.
 
@@ -59,13 +56,13 @@ There is currently **no NuGet package**.
 3. Target **.NET 10.0** or later.
 4. Start with `LowLevelApi.md`, `HighLevelApi.md`, and `TestHarness`.
 
-## Contributing and expectations
+## Support expectations
 
-This library is developed to support real projects, not to provide complete RouterOS coverage or broad support guarantees.
+This repository is developed to support real projects, not to provide full RouterOS coverage or a full support commitment.
 
-- Issues and PRs are welcome.
-- Small, focused PRs with tests are preferred.
-- Contributions should stay async-only and avoid reflection-heavy patterns.
+- The **low-level** layer is the main supported surface.
+- The **high-level** layer is intentionally incomplete and should be treated as an expanding convenience layer.
+- Issues and PRs are welcome, but consumers should not expect comprehensive feature coverage or guaranteed support for every RouterOS scenario.
 
 ## License and credits
 
